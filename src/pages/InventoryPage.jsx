@@ -4,21 +4,18 @@ import InventoryForm from '../components/organisms/InventoryForm';
 
 const InventoryPage = () => {
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null); // Nuevo estado para el producto a editar
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Función para agregar o editar un producto
+
   const handleProductSave = (product) => {
     if (selectedProduct) {
-      // Actualizar producto existente
       setProducts(products.map((p) => (p.id === selectedProduct.id ? product : p)));
     } else {
-      // Agregar nuevo producto
       setProducts([...products, { ...product, id: products.length + 1 }]);
     }
-    setSelectedProduct(null); // Resetear el producto seleccionado después de guardarlo
+    setSelectedProduct(null);
   };
 
-  // Función para seleccionar un producto para edición
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
   };
@@ -45,7 +42,7 @@ const InventoryPage = () => {
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-2xl font-semibold mb-4 text-gray-700">Lista de Productos</h2>
             {products.length > 0 ? (
-              <ProductList products={products} onEdit={handleEditProduct} />
+              <ProductList products={products} onEdit={handleEditProduct} BtnHidden={false}/>
             ) : (
               <p className="text-gray-600">No hay productos en el inventario.</p>
             )}

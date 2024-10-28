@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Input from '../components/atoms/Input';
 import Button from '../components/atoms/Button';
+import Logo from '../assets/img/logo-2.png'
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-600 flex justify-center items-center">
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
         <div className="mb-8 text-center">
-          <img src="/logo.png" alt="Logo" className="mx-auto w-24 h-24 mb-4" />
+          <img src={Logo} alt="Logo" className="mx-auto w-24 h-24 mb-4" />
           <h1 className="text-3xl font-semibold text-gray-700">Iniciar Sesión</h1>
           <p className="text-gray-500">Accede a tu cuenta</p>
         </div>

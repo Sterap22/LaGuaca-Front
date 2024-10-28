@@ -11,7 +11,6 @@ const TablesPage = () => {
     { id: 4, name: "Mesa 4", orders: [], total: 0, history: [], selectedProducts: {} },
   ]);
 
-  // Datos de productos
   const [products] = useState([
     { id: 1, category: 'Cervezas', name: 'Águila', price: 3000, image: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Botella-nueva-sin-tapa-330-cerveza-colombiana.png' },
     { id: 2, category: 'Cigarrillos', name: 'Cigarrillo Luky verde', price: 3500, image: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Botella-nueva-sin-tapa-330-cerveza-colombiana.png' },
@@ -24,7 +23,6 @@ const TablesPage = () => {
   const [newTableName, setNewTableName] = useState('');
   const [currentTableId, setCurrentTableId] = useState(null);
 
-  // Función para agregar una nueva mesa
   const addTable = () => {
     const newTable = {
       id: tables.length + 1,
@@ -37,7 +35,6 @@ const TablesPage = () => {
     closeAddTableModal();
   };
 
-  //Añadir productos a la mesa
   const addProduct = (productId) => {
     const updatedTables = tables.map((table) => {
       if (table.id === currentTableId) {
@@ -58,7 +55,6 @@ const TablesPage = () => {
     setTables(updatedTables);
   };
 
-  // Función para calcular el total de la mesa
   const calculateTotal = (selectedProducts) => {
     return Object.keys(selectedProducts).reduce((acc, productId) => {
       const product = products.find((p) => p.id === parseInt(productId));
@@ -66,20 +62,17 @@ const TablesPage = () => {
     }, 0);
   };
 
-  // Función para abrir el modal de productos
   const openModal = (table) => {
     setCurrentTableId(table.id);
     setSelectedTable(table);
     setShowModal(true);
   };
 
-  // Función para cerrar el modal
   const closeModal = () => {
     setSelectedTable(null);
     setShowModal(false);
   };
 
-  // Función para guardar los productos de la mesa sin limpiar
   const saveTable = (updatedTable) => {
     const updatedTables = tables.map(table => {
       if (table.id === updatedTable.id) {
@@ -91,7 +84,6 @@ const TablesPage = () => {
     closeModal();
   };
 
-  // Función para limpiar la mesa después del pago
   const payTable = (updatedTable) => {
     const updatedTables = tables.map(table => {
       if (table.id === updatedTable.id) {
@@ -103,14 +95,12 @@ const TablesPage = () => {
     setTables(updatedTables);
   };
 
-  // Función para mostrar el historial de la mesa
   const showTableHistory = (table) => {
     alert(`Historial de ${table.name}:\n${table.history.map((entry, index) => 
       `Pedido ${index + 1}: ${entry.orders.length} productos, Total: $${entry.total}`
     ).join('\n')}`);
   };
 
-  // Función para crar el sorteable de la mesa falta hacerlo para mobile
   const moveAccountToTable = (fromTableId, toTableId) => {
     const fromTable = tables.find((t) => t.id === parseInt(fromTableId));
     const toTable = tables.find((t) => t.id === parseInt(toTableId));
@@ -138,9 +128,39 @@ const TablesPage = () => {
     }
   };
 
-  // Función para cerrar el modal de agregar mesa
   const closeAddTableModal = () => {
     setIsAddTableModalOpen(false);
+  };
+
+  const handleDragStart = (event, tableId) => {
+    event.dataTransfer?.setData('text/plain', tableId);
+    setCurrentTableId(tableId);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (event, targetTableId) => {
+    event.preventDefault();
+    const fromTableId = parseInt(event.dataTransfer?.getData('text'));
+    moveAccountToTable(fromTableId, targetTableId);
+  };
+
+  const handleTouchStart = (tableId) => {
+    setCurrentTableId(tableId);
+  };
+
+  const handleTouchMove = (event) => {
+    console.log(event,' texto');
+    event.preventDefault();
+  };
+
+  const handleTouchEnd = (targetTableId) => {
+    if (currentTableId !== null) {
+      moveAccountToTable(currentTableId, targetTableId);
+      setCurrentTableId(null);
+    }
   };
 
   return (
@@ -148,25 +168,39 @@ const TablesPage = () => {
       <div className="container mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">Gestión de Mesas</h1>
         
-        {/* Listado de mesas */}
-        <TableList tables={tables} openModal={openModal} onDrop={moveAccountToTable} />
+        <div className="grid grid-cols-2 gap-6">
+          {tables.map((table) => (
+            <div
+              key={table.id}
+              draggable
+              onDragStart={(event) => handleDragStart(event, table.id)}
+              onDragOver={handleDragOver}
+              onDrop={(event) => handleDrop(event, table.id)}
+              onTouchStart={(event) => handleTouchStart(event, table.id)}
+              onTouchMove={(event) =>handleTouchMove(event)}
+              onTouchEnd={() => handleTouchEnd(table.id)}
+              className="table-item"
+            >
+               {/* Listado de mesas */}
+                <TableList tables={table} openModal={openModal} onDrop={moveAccountToTable} />
+            </div>
+          ))}
+        </div>
 
-        {/* Modal para agregar más mesas */}
-          <Modal
-            isOpen={isAddTableModalOpen}
-            onClose={closeAddTableModal}
-            onSave={addTable}
-          >
-            <input
-                type="text"
-                value={newTableName}
-                onChange={(e) => setNewTableName(e.target.value)}
-                className="border border-gray-300 p-2 rounded w-full"
-                placeholder="Escribe el nombre o número de la mesa"
-              />
-          </Modal>
+        <Modal
+          isOpen={isAddTableModalOpen}
+          onClose={closeAddTableModal}
+          onSave={addTable}
+        >
+          <input
+            type="text"
+            value={newTableName}
+            onChange={(e) => setNewTableName(e.target.value)}
+            className="border border-gray-300 p-2 rounded w-full"
+            placeholder="Escribe el nombre o número de la mesa"
+          />
+        </Modal>
 
-        {/* Botón para agregar más mesas */}
         <div className="flex justify-center mt-6">
           <button
             onClick={()=>{setIsAddTableModalOpen(true);}}
@@ -176,7 +210,6 @@ const TablesPage = () => {
           </button>
         </div>
 
-        {/* Modal de productos */}
         {showModal && (
           <ProductModal 
             products={products} 

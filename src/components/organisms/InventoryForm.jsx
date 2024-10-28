@@ -1,45 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Button from '../atoms/Button';
 import Input from '../atoms/Input';
+import { useForm } from '../../hooks/useForm';
+import { FormInventory } from '../../Interface/IInventory';
 
 const InventoryForm = ({ onSave, selectedProduct, setSelectedProduct }) => {
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [quantity, setQuantity] = useState('');
+  const { state, setState, onChange } = useForm(FormInventory);
 
-  // Cargar los datos del producto seleccionado en el formulario
   useEffect(() => {
     if (selectedProduct) {
-      setName(selectedProduct.name);
-      setPrice(selectedProduct.price);
-      setQuantity(selectedProduct.quantity);
+      setState({
+        ...FormInventory, 
+        image: selectedProduct.image, 
+        name: selectedProduct.name, 
+        price: selectedProduct.price, 
+        quantity: selectedProduct.quantity
+      })
     } else {
-      setName('');
-      setPrice('');
-      setQuantity('');
+      setState(FormInventory)
     }
   }, [selectedProduct]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const product = { name, price, quantity: parseInt(quantity) };
-    onSave(product);
-    setName('');
-    setPrice('');
-    setQuantity('');
+    if (ValidState(state)) {
+      alert('Por favor, complete todos los campos');
+      return
+    }
+    onSave(state);
+    setState(FormInventory)
   };
 
+  const ValidState = (state) =>{
+    const tempState = Object.values(state).some(element => {
+      return element === "" || element === null || element === undefined;
+    });
+    return tempState;
+  }
+
   const handleCancel = () => {
-    setSelectedProduct(null); // Cancelar la edición
+    setSelectedProduct(null);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Input
+          placeholder="Imagen del producto"
+          value={state.image}
+          onChange={({target}) => onChange(target.value, 'image')}
+          className="w-full"
+        />
+      </div>
+      <div>
+        <Input
           placeholder="Nombre del producto"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={state.name}
+          onChange={({target}) => onChange(target.value, 'name')}
           className="w-full"
         />
       </div>
@@ -47,8 +64,8 @@ const InventoryForm = ({ onSave, selectedProduct, setSelectedProduct }) => {
         <Input
           type="number"
           placeholder="Precio"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          value={state.price}
+          onChange={({target}) => onChange(target.value, 'price')}
           className="w-full"
         />
       </div>
@@ -56,8 +73,8 @@ const InventoryForm = ({ onSave, selectedProduct, setSelectedProduct }) => {
         <Input
           type="number"
           placeholder="Cantidad"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
+          value={state.quantity}
+          onChange={({target}) => onChange(target.value,'quantity')}
           className="w-full"
         />
       </div>
