@@ -21,9 +21,9 @@ const InventoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-600 p-8">
       <div className="container mx-auto">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">Inventario de Productos</h1>
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8 text-white">Inventario de Productos</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Formulario de Inventario */}
@@ -39,7 +39,7 @@ const InventoryPage = () => {
           </div>
 
           {/* Listado de Productos */}
-          <div className="bg-white shadow-lg rounded-lg p-6">
+          <div className="bg-white shadow-lg rounded-lg p-6 overflow-y-auto max-h-[600px]">
             <h2 className="text-2xl font-semibold mb-4 text-gray-700">Lista de Productos</h2>
             {products.length > 0 ? (
               <ProductList products={products} onEdit={handleEditProduct} BtnHidden={false}/>

@@ -164,9 +164,9 @@ const TablesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-600 p-8">
       <div className="container mx-auto">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">Gestión de Mesas</h1>
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8 text-white">Gestión de Mesas</h1>
         
         <div className="grid grid-cols-2 gap-6">
           {tables.map((table) => (

@@ -1,17 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '../atoms/Button';
 import Input from '../atoms/Input';
 import { useForm } from '../../hooks/useForm';
 import { FormInventory } from '../../Interface/IInventory';
+import CategoryDropdown from '../molecules/CategoryDropdown';
 
 const InventoryForm = ({ onSave, selectedProduct, setSelectedProduct }) => {
   const { state, setState, onChange } = useForm(FormInventory);
+  const [categories ] = useState(['Cervezas', 'Cigarrillos', 'Paquetes']);
 
   useEffect(() => {
     if (selectedProduct) {
       setState({
         ...FormInventory, 
         image: selectedProduct.image, 
+        category: selectedProduct.category,
         name: selectedProduct.name, 
         price: selectedProduct.price, 
         quantity: selectedProduct.quantity
@@ -44,6 +47,12 @@ const InventoryForm = ({ onSave, selectedProduct, setSelectedProduct }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <CategoryDropdown
+        label="Categoría"
+        categories={categories}
+        value={state.category}
+        onChange={({target}) => onChange(target.value, 'category')}
+      />
       <div>
         <Input
           placeholder="Imagen del producto"
