@@ -1,19 +1,19 @@
 import React, { lazy } from 'react'
 import {  Route, Routes } from 'react-router-dom';
 
-const LoginPage = lazy(()=>import('../pages/LoginPage'))
 const InventoryPage = lazy(()=>import('../pages/InventoryPage'))
 const TablesPage = lazy(()=>import('../pages/TablesPage'))
+const ReportingPage = lazy(()=>import('../pages/ReportingPage'))
 
-const Routers = () => {
+const RoutersIn = () => {
     return(
     <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/home" element={<TablesPage />} />
+        <Route path="*" element={<TablesPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="//Reporting" element={<ReportingPage />} />
     </Routes>
     )
 }
 
 
-export default Routers
+export default RoutersIn

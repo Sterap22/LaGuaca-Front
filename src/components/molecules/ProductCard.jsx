@@ -4,7 +4,7 @@ import UIIconn from '../atoms/UIIconn';
 
 const ProductCard = ({ product = [], quantity = [], onAdd = {}, onRemove = {}, BtnHidden = true, onEdit = {} }) => {
   return (
-    <div className="w-40 p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-center">
+    <div className="w-80 p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-center">
       {!BtnHidden&&(
         <Button onClick={() => onEdit(product)}  className="bg-transparent text-black" >
           <UIIconn CustomName="create-outline" CustomStyle={{ fontSize: '25px', color: 'black' }}/>

@@ -8,10 +8,14 @@ const ProductModal = ({ products = [], onAddProduct = {}, table = [], tablesObje
 
   // Función para agregar productos al carrito
   const handleAddProduct = (product) => {
-    setCart([...cart, product]);
+    const timestamp = new Date().toISOString();
+    const productWithTimestamp = {
+      ...product,
+      addedAt: timestamp,
+    };
+    setCart([...cart, productWithTimestamp]);
     setTotal(total + product.price);
-    console.log(tablesObject,' datos de tabla', product,' producto ', currentTableId);
-    onAddProduct(product.id)
+    onAddProduct(product.id);
   };
 
   // Función para quitar productos del carrito

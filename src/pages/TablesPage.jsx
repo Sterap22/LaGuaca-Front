@@ -1,39 +1,109 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TableList from '../components/organisms/TableList';
 import ProductModal from '../components/organisms/ProductModal';
 import Modal from '../components/organisms/Modal';
+import TableService from '../services/table.service';
+import { FormSell } from '../Interface/ISell';
 
 const TablesPage = () => {
-  const [tables, setTables] = useState([
-    { id: 1, name: "Mesa 1", orders: [], total: 0, history: [], selectedProducts: {} },
-    { id: 2, name: "Mesa 2", orders: [], total: 0, history: [], selectedProducts: {} },
-    { id: 3, name: "Mesa 3", orders: [], total: 0, history: [], selectedProducts: {} },
-    { id: 4, name: "Mesa 4", orders: [], total: 0, history: [], selectedProducts: {} },
-  ]);
-
-  const [products] = useState([
-    { id: 1, category: 'Cervezas', name: 'Águila', price: 3000, image: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Botella-nueva-sin-tapa-330-cerveza-colombiana.png' },
-    { id: 2, category: 'Cigarrillos', name: 'Cigarrillo Luky verde', price: 3500, image: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Botella-nueva-sin-tapa-330-cerveza-colombiana.png' },
-    { id: 3, category: 'Paquetes', name: 'Todo rico', price: 3500, image: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Botella-nueva-sin-tapa-330-cerveza-colombiana.png' },
-  ]);
+  const { GetTable, GetProduct, GetCategory, SaveSell,CreateTableServices, PaySell }  = TableService();
+  const [tables, setTables] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [products, setProducts] = useState([]);
 
   const [selectedTable, setSelectedTable] = useState(null);
+  const [sellDTO, setSellDTO] = useState(FormSell);
   const [showModal, setShowModal] = useState(false);
   const [isAddTableModalOpen, setIsAddTableModalOpen] = useState(false);
   const [newTableName, setNewTableName] = useState('');
   const [currentTableId, setCurrentTableId] = useState(null);
 
   const addTable = () => {
-    const newTable = {
-      id: tables.length + 1,
-      name: newTableName,
-      orders: [],
-      total: 0,
-      history: []
-    };
-    setTables([...tables, newTable]);
-    closeAddTableModal();
+    CreateTableServices({name: newTableName}).then((succ)=>{
+      if (succ.status===200) {
+        const newTable = {
+          id: succ.data.id,
+          name: succ.data.name,
+          orders: [],
+          total: 0,
+          history: []
+        };
+        setTables([...tables, newTable]);
+        closeAddTableModal();
+      }
+    })
   };
+
+  useEffect(() => {
+    GetAllCategory();
+    GetAllTable();
+  }, [])
+
+  const GetAllTable =()=>{
+    GetTable().then(
+      (succ)=>{
+        if (succ.status !== 200) {
+          return
+        }
+        const newTable = [];
+        succ.data.forEach(element => {
+          newTable.push({
+            id: element.id,
+            name: element.name,
+            orders: [],
+            total: 0,
+            history: [],
+            selectedProducts: {},
+            idSell: 0
+          });
+          setTables(newTable);
+        });
+      })
+  }
+
+  const GetAllCategory =()=>{
+    GetCategory().then(
+      (succ)=>{
+        if (succ.status !== 200) {
+          return
+        }
+        const newCategory = [];
+        succ.data.forEach(element => {
+          newCategory.push({
+            id: element.id,
+            name: element.name
+          });
+        });
+        setCategory(newCategory);
+        GetAllProduct(newCategory);
+      })
+  }
+
+  const GetAllProduct = (categories) =>{
+    GetProduct().then((succ)=>{
+      if (succ.status !== 200) {
+        return
+      }
+      const newProduct = [];
+      succ.data.forEach(element => {
+        if (element.quantity > 0) {
+          const tempCategory = categories.find((x) => x.id == element.category);
+          
+          const categoryName = tempCategory ? tempCategory.name : 'Sin categoría';
+          newProduct.push({
+            id: element.id,
+            category: categoryName,
+            name: element.name,
+            price: element.price,
+            image: element.image,
+            quantity: element.quantity,
+          });
+        }
+      });
+      setProducts(newProduct);      
+    })
+  }
+  
 
   const addProduct = (productId) => {
     const updatedTables = tables.map((table) => {
@@ -74,25 +144,39 @@ const TablesPage = () => {
   };
 
   const saveTable = (updatedTable) => {
-    const updatedTables = tables.map(table => {
+    let updatedTables = tables.map(table => {
       if (table.id === updatedTable.id) {
         return { ...table, orders: updatedTable.orders, total: updatedTable.total };
       }
       return table;
     });
-    setTables(updatedTables);
-    closeModal();
+    SaveSell({...sellDTO,
+      id: updatedTable.idSell,
+      quantity: updatedTable.orders.length,
+      idTable: updatedTable.id,
+      product: JSON.stringify(updatedTable.orders),
+      clientName: updatedTable.name,
+      idUser: 1,
+      state: true
+    }).then((succ)=>{
+      if (succ.status === 200) {
+        updatedTables = tables.map(table => {
+          if (table.id === updatedTable.id) {
+            return { ...table, orders: updatedTable.orders, total: updatedTable.total, idSell: succ.data.newSell.id };
+          }
+          return table;
+        });
+        setTables(updatedTables);
+        closeModal();
+      }
+    })
   };
 
   const payTable = (updatedTable) => {
-    const updatedTables = tables.map(table => {
-      if (table.id === updatedTable.id) {
-        const newHistory = [...table.history, { orders: table.orders, total: table.total }];
-        return { ...table, orders: [], total: 0, history: newHistory };
-      }
-      return table;
-    });
-    setTables(updatedTables);
+    PaySell({id: updatedTable.id, state: false}).then(()=>{
+      window.location.reload()
+    })
+    
   };
 
   const showTableHistory = (table) => {
@@ -152,7 +236,6 @@ const TablesPage = () => {
   };
 
   const handleTouchMove = (event) => {
-    console.log(event,' texto');
     event.preventDefault();
   };
 
@@ -169,7 +252,7 @@ const TablesPage = () => {
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-8 text-white">Gestión de Mesas</h1>
         
         <div className="grid grid-cols-2 gap-6">
-          {tables.map((table) => (
+          {tables.length  > 0 && tables.map((table) => (
             <div
               key={table.id}
               draggable

@@ -2,17 +2,39 @@ import React, { useState } from 'react';
 import Input from '../components/atoms/Input';
 import Button from '../components/atoms/Button';
 import Logo from '../assets/img/logo-2.png'
+import { useForm } from '../hooks/useForm';
+import { FormLogin } from '../Interface/login';
+import LoginServices from '../services/login.services';
+import Loader from '../components/organisms/Loader';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { state, setState, onChange } = useForm(FormLogin);
+  const { loginAUTH } = LoginServices();
+  const [ stateLoader, getStateLoader ] = useState(false)
 
   const handleLogin = () => {
-    console.log("Iniciar sesión:", email, password);
+    getStateLoader(true)
+    loginAUTH(state).then((succ)=>{
+      if (succ?.status !== 200) {
+        localStorage.clear();
+        setState(FormLogin)
+        getStateLoader(false)
+        return
+      }
+      localStorage.setItem('Token-data',succ?.data.token);
+      window.location.href = '/home';
+      getStateLoader(false)
+    }).catch(()=>{
+      localStorage.clear();
+      setState(FormLogin)
+    }).finally(()=>{
+      getStateLoader(false)
+    })
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-600 flex justify-center items-center">
+      {stateLoader&&<Loader />}
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
         <div className="mb-8 text-center">
           <img src={Logo} alt="Logo" className="mx-auto w-24 h-24 mb-4" />
@@ -23,8 +45,8 @@ const LoginPage = () => {
           <div>
             <Input
               placeholder="Correo Electrónico"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={state.email}
+              onChange={({target}) => onChange(target.value, 'email')}
               className="w-full"
             />
           </div>
@@ -32,8 +54,8 @@ const LoginPage = () => {
             <Input
               type="password"
               placeholder="Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={state.password}
+              onChange={({target}) => onChange(target.value, 'password')}
               className="w-full"
             />
           </div>
