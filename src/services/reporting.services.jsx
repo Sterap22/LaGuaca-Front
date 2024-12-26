@@ -17,7 +17,7 @@ const ReportingServices = () => {
       if (!productTotals[item.name]) {
         productTotals[item.name] = { quantity: 0, totalPrice: 0 };
       }
-      productTotals[item.name].quantity += 1; // Cada producto siempre tiene cantidad 1
+      productTotals[item.name].quantity += 1;
       productTotals[item.name].totalPrice += item.price;
     });
   
@@ -29,7 +29,7 @@ const ReportingServices = () => {
           <td>${item.clientName}</td>
           <td>${item.name}</td>
           <td>1</td>
-          <td>${new Date(item.addedAt).toLocaleDateString()}</td>
+          <td>${new Date(item.addedAt).toISOString()}</td>
           <td>${item.price}</td>
         </tr>`
       )

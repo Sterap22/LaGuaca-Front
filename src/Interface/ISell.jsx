@@ -4,6 +4,6 @@ export const FormSell = {
     idTable: 0,
     product: 0,
     clientName: "exam",
-    idUser: 0,
+    idUser: localStorage.getItem('UserID'),
     state: true,
 }

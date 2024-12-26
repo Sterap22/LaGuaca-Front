@@ -22,6 +22,7 @@ const LoginPage = () => {
         return
       }
       localStorage.setItem('Token-data',succ?.data.token);
+      localStorage.setItem('UserID',succ?.data.user.id);
       window.location.href = '/home';
       getStateLoader(false)
     }).catch(()=>{

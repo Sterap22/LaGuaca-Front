@@ -17,7 +17,6 @@ function App() {
   };
 
   const refreshSessionToken = () => {
-    console.log('Llego el refresh');
     refresh();
   };
 

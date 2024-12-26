@@ -4,10 +4,12 @@ import ProductModal from '../components/organisms/ProductModal';
 import Modal from '../components/organisms/Modal';
 import TableService from '../services/table.service';
 import { FormSell } from '../Interface/ISell';
+import Loader from '../components/organisms/Loader';
 
 const TablesPage = () => {
   const { GetTable, GetProduct, GetCategory, SaveSell,CreateTableServices, PaySell }  = TableService();
   const [tables, setTables] = useState([]);
+  const [loader, setLoader] = useState(true);
   const [category, setCategory] = useState([]);
   const [products, setProducts] = useState([]);
 
@@ -19,6 +21,8 @@ const TablesPage = () => {
   const [currentTableId, setCurrentTableId] = useState(null);
 
   const addTable = () => {
+    console.log(tables,' tablas agregadas');
+    
     CreateTableServices({name: newTableName}).then((succ)=>{
       if (succ.status===200) {
         const newTable = {
@@ -42,23 +46,36 @@ const TablesPage = () => {
   const GetAllTable =()=>{
     GetTable().then(
       (succ)=>{
-        if (succ.status !== 200) {
+        if (succ.status !== 200 || succ.data.length === 0) {
+          setTables([])
           return
         }
-        const newTable = [];
-        succ.data.forEach(element => {
-          newTable.push({
-            id: element.id,
-            name: element.name,
-            orders: [],
-            total: 0,
-            history: [],
-            selectedProducts: {},
-            idSell: 0
-          });
-          setTables(newTable);
-        });
+        const newTable = succ.data.map(element => ({
+          id: element.id,
+          name: element.name,
+          orders: JSON.parse(element.product),
+          total: 0,
+          history: [],
+          selectedProducts: {},
+          idSell: 0
+        }));
+        console.log(newTable, ' antes de guardar ');
+        setTables(newTable);
+        CountProdut(newTable);
+      }).finally(()=>{
+        setLoader(false)
       })
+  }
+
+  const CountProdut = (product) => {
+    console.log(product,' Count Product ', tables);
+    
+    product.forEach(element => {
+        setCurrentTableId(element.id);
+        element.orders.forEach(item => {
+           addProduct(item.id)
+        });
+    });
   }
 
   const GetAllCategory =()=>{
@@ -106,12 +123,16 @@ const TablesPage = () => {
   
 
   const addProduct = (productId) => {
+    console.log(productId,' ID del producto ', tables);
+    
     const updatedTables = tables.map((table) => {
+      console.log(table.id,' ID Tabla ', currentTableId);
       if (table.id === currentTableId) {
         const newSelectedProducts = {
           ...table.selectedProducts,
           [productId]: (table.selectedProducts[productId] || 0) + 1
         };
+        
         const newTotal = calculateTotal(newSelectedProducts);
 
         return {
@@ -156,7 +177,6 @@ const TablesPage = () => {
       idTable: updatedTable.id,
       product: JSON.stringify(updatedTable.orders),
       clientName: updatedTable.name,
-      idUser: 1,
       state: true
     }).then((succ)=>{
       if (succ.status === 200) {
@@ -174,7 +194,7 @@ const TablesPage = () => {
 
   const payTable = (updatedTable) => {
     PaySell({id: updatedTable.id, state: false}).then(()=>{
-      window.location.reload()
+      GetAllTable();
     })
     
   };
@@ -248,6 +268,7 @@ const TablesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-600 p-8">
+      {loader&&<Loader />}
       <div className="container mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-8 text-white">Gestión de Mesas</h1>
         

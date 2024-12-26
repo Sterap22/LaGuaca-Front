@@ -51,7 +51,6 @@ const ReportingPage = () => {
 
   // Genera el reporte con los filtros aplicados
   const handleGeneratePDF = () => {
-    console.log('Generando PDF con datos:', filteredData);
     generatePDF(filteredData);
   };
 

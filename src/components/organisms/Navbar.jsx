@@ -40,6 +40,11 @@ const Navbar = () => {
                 Reporting
               </a>
             </li>
+            <li className="py-4 lg:py-0">
+              <a  className="hover:text-yellow-300 transition" onClick={()=>{localStorage.clear();window.location.reload();}}>
+                logout
+              </a>
+            </li>
           </ul>
         </div>
       </div>
